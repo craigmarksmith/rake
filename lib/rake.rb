@@ -2128,9 +2128,18 @@ module Rake
       else
         width = displayable_tasks.collect { |t| t.name_with_args.length }.max || 10
         max_column = truncate_output? ? terminal_width - name.size - width - 7 : nil
-        displayable_tasks.each do |t|
-          printf "#{name} %-#{width}s  # %s\n",
-            t.name_with_args, max_column ? truncate(t.comment, max_column) : t.comment
+        displayable_tasks.each_with_index do |t,index|
+          if options.interactive
+            printf "#{index}) #{name} %-#{width}s  # %s\n",
+              t.name_with_args, max_column ? truncate(t.comment, max_column) : t.comment
+          else
+            printf "#{name} %-#{width}s  # %s\n",
+              t.name_with_args, max_column ? truncate(t.comment, max_column) : t.comment
+          end
+        end
+        if options.interactive
+          printf "Choose a task: "
+          displayable_tasks[readline.to_i].invoke
         end
       end
     end
@@ -2227,9 +2236,17 @@ module Rake
         ['--libdir', '-I LIBDIR', "Include LIBDIR in the search path for required modules.",
           lambda { |value| $:.push(value) }
         ],
+        ['--interactive', '-i [PATTERN]', "Display the tasks (matching optional PATTERN) with descriptions, then choose the task you'd like to run.",
+          lambda { |value|
+            options.show_tasks = true
+            options.show_task_pattern = Regexp.new(value || '')
+            options.full_description = false
+            options.interactive = true
+          }
+        ],
         ['--prereqs', '-P', "Display the tasks and dependencies, then exit.",
           lambda { |value| options.show_prereqs = true }
-        ],
+        ],       
         ['--quiet', '-q', "Do not log messages to standard output.",
           lambda { |value| verbose(false) }
         ],
