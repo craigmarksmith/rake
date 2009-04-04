@@ -2137,7 +2137,7 @@ module Rake
               t.name_with_args, max_column ? truncate(t.comment, max_column) : t.comment
           end
         end
-        if options.interactive
+        if options.interactive && !displayable_tasks.empty?
           printf "Choose a task: "
           task_input = readline
           displayable_tasks[task_input.to_i].invoke unless task_input.nil? || task_input.empty?

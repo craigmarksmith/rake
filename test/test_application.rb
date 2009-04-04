@@ -70,6 +70,16 @@ class TestApplication < Test::Unit::TestCase
     assert_match(/^0\) rake t/, out)
     assert_match(/# COMMENT/, out)
   end
+  
+  def test_should_not_ask_the_user_to_enter_an_option_when_no_tasks_are_listed
+    flexmock(@app)
+    @app.options.show_task_pattern = //
+    @app.options.interactive = true
+    @app.last_description = "COMMENT"
+    out = capture_stdout do @app.instance_eval { display_tasks_and_comments } end
+    assert_no_match(/^0\) rake t/, out)
+    assert_no_match(/Choose a task:/, out)
+  end
 
   def test_display_tasks_with_long_comments
     in_environment('RAKE_COLUMNS' => '80') do
