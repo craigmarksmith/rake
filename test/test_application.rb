@@ -43,13 +43,28 @@ class TestApplication < Test::Unit::TestCase
   
   def test_interactive_task
     flexmock(@app)
-    @app.should_receive(:readline).and_return(0).once
+    @app.should_receive(:readline).and_return('0').once
     @app.options.show_task_pattern = //
     @app.options.interactive = true
     @app.last_description = "COMMENT"
     test_task = Rake::Task
     flexmock(test_task)
     test_task.new_instances.should_receive(:invoke).once
+    @app.define_task(test_task, "t")
+    out = capture_stdout do @app.instance_eval { display_tasks_and_comments } end
+    assert_match(/^0\) rake t/, out)
+    assert_match(/# COMMENT/, out)
+  end
+  
+  def test_should_not_run_any_tasks_when_user_enters_nothing
+    flexmock(@app)
+    @app.should_receive(:readline).and_return('').once
+    @app.options.show_task_pattern = //
+    @app.options.interactive = true
+    @app.last_description = "COMMENT"
+    test_task = Rake::Task
+    flexmock(test_task)
+    test_task.new_instances.should_receive(:invoke).never
     @app.define_task(test_task, "t")
     out = capture_stdout do @app.instance_eval { display_tasks_and_comments } end
     assert_match(/^0\) rake t/, out)
