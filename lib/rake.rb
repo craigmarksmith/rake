@@ -2140,7 +2140,7 @@ module Rake
         if options.interactive && !displayable_tasks.empty?
           printf "Choose a task: "
           task_input = readline
-          displayable_tasks[task_input.to_i].invoke unless task_input.nil? || task_input.empty?
+          displayable_tasks[task_input.to_i].invoke unless task_input.nil? || task_input.empty? || displayable_tasks[task_input.to_i].nil?
         end
       end
     end
